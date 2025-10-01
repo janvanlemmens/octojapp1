@@ -1,35 +1,36 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Routes, Route, NavLink } from "react-router-dom";
+import Invoices from "./pages/Invoices";
+import InvoiceForm from "./pages/InvoiceForm";
+import Relations from "./pages/Relations";
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+ 
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+     <nav className="navbar">
+      <NavLink to="/invoices" className={({ isActive }) => (isActive ? "active" : "")}>Invoices</NavLink>
+      <NavLink to="/invform" className={({ isActive }) => (isActive ? "active" : "")}>InvoiceForm</NavLink>
+      <NavLink to="/relations" className={({ isActive }) => (isActive ? "active" : "")}>Relations</NavLink>
+     </nav>
+
+    <main className="content">
+      <Routes>
+        <Route path="/invoices" element={<Invoices />} />
+        <Route path="/invform" element={<InvoiceForm />} />
+        <Route path="/relations" element={<Relations />} />
+        {/* fallback */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      </main>
+      </>
+    
   )
+
+  function NotFound() {
+    return <h2>Page not found</h2>; 
+}
 }
 
-export default App
+export default App;

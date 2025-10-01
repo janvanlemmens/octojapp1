@@ -10,10 +10,17 @@ export async function getRealm(schema, path) {
   if (realmInstances[path] && !realmInstances[path].isClosed) {
     return realmInstances[path];
   }
-
+/*
+Realm.deleteFile({
+  path: "relations.realm",
+  schema: [RelationsSchema],
+});*/
+  
   const realm = await Realm.open({
     schema: [schema],
     path,
+    schemaVersion: 1,
+   deleteRealmIfMigrationNeeded: true,  // ⚠️ DEV ONLY
   });
 
   realmInstances[path] = realm;
@@ -45,22 +52,32 @@ export function closeAllRealms() {
 
 export async function addRelation(relationData) {
   const realmr = await getRelationsRealm();
+  try {
   realmr.write(() => {
     realmr.create("Relations", relationData, Realm.UpdateMode.Modified);
    }) 
+  return relationData.id;
+  } catch (error) {
+    console.error("Failed to add/update relation:", error);
+    
+  }
 }
 
 export async function deleteRelation(id) {
   const realmr = await getRelationsRealm();
-
+  try {
   realmr.write(() => {
     const toDelete = realmr.objectForPrimaryKey("Relations", id);
     if (toDelete) {
       realmr.delete(toDelete);
     }
   });
-
   return id;
+   } catch (error) {
+    console.error("Failed to delete relation:", error);
+    throw error;
+  }
+
 }
 
 /*

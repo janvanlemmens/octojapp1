@@ -7,7 +7,7 @@ const RelationsSchema = {
     client: { type: "bool", default: false },
     supplier: { type: "bool", default: false },
     streetandnr: "string?",
-    postalcode: "int?",
+    postalcode: "string?",
     city: "string?",
     country: "string?",
     phone: "string?" ,
@@ -34,6 +34,7 @@ const InvoicesSchema = {
     paid: { type: "bool", default: false },
     paymentreference: "string?",
     comment: "string?",
+    pdf: "string?",
   },
 };
 
