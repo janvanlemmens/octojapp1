@@ -6,18 +6,19 @@ const realmInstances = {}; // cache: { path: realmInstance }
 /**
  * Opens (or reuses) a Realm instance by schema + path
  */
-export async function getRealm(schema, path) {
+export async function getRealm(schemas, path) {
   if (realmInstances[path] && !realmInstances[path].isClosed) {
     return realmInstances[path];
   }
 /*
 Realm.deleteFile({
-  path: "relations.realm",
-  schema: [RelationsSchema],
-});*/
+  path: "invoices.realm",
+  schema: [InvoicesSchema],
+});
+*/
   
   const realm = await Realm.open({
-    schema: [schema],
+    schema: Array.isArray(schemas) ? schemas : [schemas],
     path,
     schemaVersion: 1,
    deleteRealmIfMigrationNeeded: true,  // ⚠️ DEV ONLY
@@ -35,7 +36,7 @@ export async function getRelationsRealm() {
 }
 
 export async function getInvoicesRealm() {
-  return getRealm(InvoicesSchema, "invoices.realm");
+  return getRealm([InvoicesSchema, RelationsSchema], "invoices.realm"); //When a schema links to another schema, you must include both schemas when opening the Realm.
 }
 
 /**
@@ -60,6 +61,31 @@ export async function addRelation(relationData) {
   } catch (error) {
     console.error("Failed to add/update relation:", error);
     
+  }
+}
+
+export async function addInvoice(invoiceData) {
+   console.log("relation",invoiceData.relation)
+
+  try {
+  const realmi = await getInvoicesRealm();
+  const realmr = await getRelationsRealm();
+ const relObj = realmr.objectForPrimaryKey("Relations",invoiceData.relation)
+ console.log("relObj",relObj)
+ if (!relObj) {
+      throw new Error(`Relation with id ${invoiceData.relation} not found in Realm`);
+    }
+  realmi.write(() => {
+    realmi.create("Invoices", {
+      ...invoiceData,
+      relation: relObj
+    }, 
+    Realm.UpdateMode.Modified);
+   }) 
+  return invoiceData.id;
+  } catch (error) {
+    console.error("Failed to add/update invoice:", error);
+    throw error; // so server.js can return 500 properly
   }
 }
 

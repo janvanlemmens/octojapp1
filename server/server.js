@@ -1,13 +1,16 @@
+import Realm from "realm";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import axios from "axios";
-import { addRelation,  getRelationsRealm, getInvoicesRealm } from "./realmHelper.js";
+import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm } from "./realmHelper.js";
 import { realmToJson } from "./utils/realmToJson.js";
 
 dotenv.config();
+//nodemon server.js --ignore '*.realm*' --ignore '*.note' --ignore '*.lock'
+
 
 const app = express();
 const api = axios.create(); // Create an Axios instance
@@ -131,6 +134,36 @@ app.get("/octo-bookyears", async (req, res) => {
   }
 });
 
+
+app.get("/octo-bookm", async (req, res) => {
+  const by = "13";
+  const url =
+    process.env.URL +
+    "/dossiers/" +
+    process.env.DOS_NR +
+    "/bookyears/" +
+    by +
+    "/bookings/modified";
+  const auth = await getAuth();  
+  const dossiertoken = await getToken(auth);  
+  const dm = '2025-04-01 00:00:00.000'
+  const jk = "1"
+  try {
+    const response = await api.get(url, {
+      params: { journalTypeId: jk, modifiedTimeStamp: dm },
+      headers: {
+        dossierToken: dossiertoken,
+        "Content-Type": "application/json",
+      },
+    });
+
+    res.json(response.data);
+    // store.set("dostoken", response);
+  } catch (err) {
+    res.status(500).json({ error: err });
+  }
+});
+
 app.get("/octo-relations", async (req, res) => {
   const url = process.env.URL + "/dossiers/" + process.env.DOS_NR + "/relations";
   
@@ -151,7 +184,7 @@ app.get("/octo-relations", async (req, res) => {
   }
 });
 
-app.post("/octo-addrelation", async (req, res) => {
+app.post("/realm-addrelation", async (req, res) => {
   const relationData = req.body; // Expecting relation data in request body
   console.log("Adding relation:", relationData);
   try {
@@ -172,6 +205,17 @@ app.get("/realm-relations", async (req, res) => {
     console.error("Realm fetch error:", err);
     res.status(500).json({ error: "Failed to fetch relations from Realm" });
   }
+})
+
+app.post("/realm-addinvoice", async (req, res) => {
+  const invoiceData = req.body; // Expecting relation data in request body
+  console.log("Adding invoice:", invoiceData);
+  try {
+    const id = await addInvoice(invoiceData);
+    res.json({ message: "Invoice added/updated", id });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add/update invoice" });
+  }   
 })
 
 app.get("/realm-invoices", async (req, res) => {

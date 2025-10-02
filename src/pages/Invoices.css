@@ -1,0 +1,55 @@
+
+.container {
+  display: flex;
+  padding: 1rem;
+  margin: 10px;
+  width: 100%
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+/* Left column */
+.column2 {
+  flex: 2;
+  overflow-y: auto;
+  border: 1px solid #999;
+  height: 88vh;
+}
+
+/* Right column */
+.column1 {
+flex: 1;
+ overflow-y: auto;
+ border: 1px solid #999;
+ padding: 10px;
+ height: 88vh;
+}
+
+/* 4) Left column: sticky header + scrollable content */
+.header-row {
+  display: flex;
+  gap: 1rem;
+  padding: 10px;
+  border-bottom: 1px solid #666;
+
+  position: sticky;   /* stick at top of left column */
+  top: 0;
+  background: #222;
+  z-index: 5;
+}
+
+.content-area {
+  flex: 1;            /* take the rest of the column height */
+  min-height: 0;
+  overflow: auto;     /* left column scrolls independently */
+}
+
+.header-row select,
+.header-row input,
+.header-row button {
+  padding: 5px;
+}

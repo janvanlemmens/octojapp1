@@ -67,7 +67,7 @@ export default function Relations() {
             //console.log("RelName:", rel.name)
             const relid = rel.relationIdentificationServiceData.relationKey.id;
             
-            const response = await axios.post("http://localhost:5001/octo-addrelation", {
+            const response = await axios.post("http://localhost:5001/realm-addrelation", {
                 id: relid,
                 name: rel.name,
                 streetandnr: rel.streetAndNr,
