@@ -1,3 +1,13 @@
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  
+  min-height: 100vh; 
+  min-width: 100vw;  
+  
+}
+
 .relations-container {
   padding: 1rem;
   max-width: 600px;

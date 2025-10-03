@@ -1,0 +1,65 @@
+// InvoiceModal.jsx
+import React, { useState } from "react";
+import "./InvoiceModal.css";
+
+export default function InvoiceModal({ invoice, onClose, onSave }) {
+
+     if (!invoice) return null;
+
+  const [comment, setComment] = useState(invoice.comment || "");
+  const [paid, setPaid] = useState(invoice.paid || false);
+  const [file, setFile] = useState(null);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const updated = {
+      ...invoice,
+      comment,
+      paid,
+      pdf: file ? file.name :  null// here you’d normally upload file and store path/url
+    };
+    onSave(updated);
+  };
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal">
+        <h2>Edit Invoice {invoice.documentnr}</h2>
+        <form onSubmit={handleSubmit}>
+          <label>
+            Comment
+            <input
+              type="text"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            />
+          </label>
+
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={paid}
+              onChange={(e) => setPaid(e.target.checked)}
+            />
+            Paid
+          </label>
+
+          <label>
+            Attach file
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+          </label>
+
+          <div className="modal-actions">
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+            <button type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

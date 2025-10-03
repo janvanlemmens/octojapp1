@@ -30,17 +30,7 @@ flex: 1;
 }
 
 /* 4) Left column: sticky header + scrollable content */
-.header-row {
-  display: flex;
-  gap: 1rem;
-  padding: 10px;
-  border-bottom: 1px solid #666;
 
-  position: sticky;   /* stick at top of left column */
-  top: 0;
-  background: #222;
-  z-index: 5;
-}
 
 .content-area {
   flex: 1;            /* take the rest of the column height */
@@ -52,4 +42,76 @@ flex: 1;
 .header-row input,
 .header-row button {
   padding: 5px;
+}
+
+.header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 10px;
+  border-bottom: 1px solid #666;
+  position: sticky;
+  top: 0;
+  background: #222;
+  z-index: 5;
+
+  /* set font defaults for everything inside */
+  font-size: 0.95rem;   /* or 1rem if you prefer */
+  font-weight: 500;     /* medium weight */
+  color: #fff;          /* white text */
+}
+
+.header-row select,
+.header-row input,
+.header-row button,
+.header-row option {
+  color: #fff;                /* white text */
+  background-color: #444;     /* consistent dark background */
+  font-size: inherit;         /* inherit from .header-row */
+  font-weight: inherit;       /* inherit from .header-row */
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+}
+
+.header-row input[type="text"] {
+  flex: 1;              /* take all remaining space */
+  min-width: 200px;     /* don’t shrink too small */
+}
+
+.header-row input::placeholder {
+  color: #fff;   /* use #fff for pure white, or #aaa for softer gray */
+  opacity: 1;    /* Firefox sometimes lowers opacity */
+}
+
+/* wrap row of inputs in a flex row too */
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.iwrapper,
+.bwrapper {
+  display: flex;              /* let child input/button expand */
+  align-items: center;
+  height: 32px;
+  border-radius: 6px;
+  padding: 0 5px;
+  background: #333;           /* optional background box */
+}
+
+/* make inputs fill their wrapper nicely */
+.iwrapper input,
+.header-row select,
+.header-row input[type="text"],
+.bwrapper button {
+  height: 28px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  background: #444;
+  color: #eee;
+  box-sizing: border-box;
 }

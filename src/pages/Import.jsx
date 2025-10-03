@@ -82,11 +82,14 @@ export default function Import() {
 }
 
   return (
+    <main className="content">
+
     <div className="relation-container">
          <div className="button-row"> 
         <CustomButton onClick={fetchInvoices}>Fetch InVoices</CustomButton>
         <CustomButton onClick={procInvoices}>Proc Relations</CustomButton>
           </div>
      </div>
+    </main>
   )
 }

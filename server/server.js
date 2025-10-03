@@ -7,12 +7,18 @@ import dotenv from "dotenv";
 import axios from "axios";
 import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm } from "./realmHelper.js";
 import { realmToJson } from "./utils/realmToJson.js";
+import path from "path";
+import fs from "fs-extra";
+
 
 dotenv.config();
 //nodemon server.js --ignore '*.realm*' --ignore '*.note' --ignore '*.lock'
 
 
 const app = express();
+
+app.use("/pdfs", express.static(path.join(process.cwd(), process.env.PDF_UPLOAD_PATH)));
+
 const api = axios.create(); // Create an Axios instance
 
 // --- interceptors
@@ -218,19 +224,20 @@ app.post("/realm-addinvoice", async (req, res) => {
   }   
 })
 
-app.get("/realm-invoices", async (req, res) => {
+app.post("/realm-invoices", async (req, res) => {
   // Fetch all invoices from Realm DB
   try {
+    const { journal, from, till } = req.body;
     const realmi = await getInvoicesRealm();
-    const allRelations = realmi.objects("Invoices");
-    res.json(realmToJson(allRelations));
+    const allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND period >= $1 AND period <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
+    res.json(realmToJson(allInvoices));
   } catch (err) {
     console.error("Realm fetch error:", err);
     res.status(500).json({ error: "Failed to fetch invoices from Realm" });
   }
 })
 
-// server.js
+// server.js denk niet gebruikt
 app.post("/invoices/upsert", async (req, res) => {
   try {
     const payload = req.body;
@@ -271,4 +278,26 @@ app.post("/invoices/upsert", async (req, res) => {
     console.error(e);
     res.status(500).json({ error: "Failed to upsert invoice" });
   }
+});
+
+app.post("/move-file", (req, res) => {
+  const { pdfname } = req.body;
+  const [ bkfol, bkpdf ] = pdfname.split("/")
+
+  const source = process.env.PDF_UPLOAD_PATH + "/" + pdfname;
+  const dest = process.env.PDF_UPLOAD_PATH + "/" + bkfol + "/selected/" + bkpdf;
+  //console.log(source + "-" + dest);
+
+  if (fs.existsSync(dest)) {
+    // File already exists
+    return res.send("File already exists");
+  }
+
+  fs.copyFile(source, dest, (err) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Error moving file");
+    }
+    res.send("File copied successfully");
+  });
 });
