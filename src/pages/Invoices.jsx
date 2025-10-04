@@ -68,8 +68,9 @@ export default function Invoices() {
 
      const inRelation = inv.relation?.name?.toLowerCase().includes(search);
      const inPaymentRef = inv.paymentreference?.toLowerCase().includes(search);
+     const inDate = inv.date?.toLowerCase().includes(search);
 
-     return inRelation || inPaymentRef;
+     return inRelation || inPaymentRef || inDate;
     })
     // sort by period desc, then documentnr desc
     .sort((a, b) => {

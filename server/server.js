@@ -9,12 +9,21 @@ import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm } from ".
 import { realmToJson } from "./utils/realmToJson.js";
 import path from "path";
 import fs from "fs-extra";
+import { fileURLToPath } from "url";
+
+// fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// always load env from the server folder
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 
-dotenv.config();
+//dotenv.config(); 
 //nodemon server.js --ignore '*.realm*' --ignore '*.note' --ignore '*.lock'
 
 const app = express();
+console.log("PDF path:", process.env.PDF_UPLOAD_PATH);
 
 app.use("/pdfs", express.static(path.resolve(process.env.PDF_UPLOAD_PATH)));
 
