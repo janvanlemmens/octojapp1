@@ -14,10 +14,10 @@ import fs from "fs-extra";
 dotenv.config();
 //nodemon server.js --ignore '*.realm*' --ignore '*.note' --ignore '*.lock'
 
-
 const app = express();
 
-app.use("/pdfs", express.static(path.join(process.cwd(), process.env.PDF_UPLOAD_PATH)));
+app.use("/pdfs", express.static(path.resolve(process.env.PDF_UPLOAD_PATH)));
+
 
 const api = axios.create(); // Create an Axios instance
 
@@ -142,7 +142,7 @@ app.get("/octo-bookyears", async (req, res) => {
 
 
 app.get("/octo-bookm", async (req, res) => {
-  const by = "13";
+  const by = "12"; //2024
   const url =
     process.env.URL +
     "/dossiers/" +
@@ -152,10 +152,10 @@ app.get("/octo-bookm", async (req, res) => {
     "/bookings/modified";
   const auth = await getAuth();  
   const dossiertoken = await getToken(auth);  
-  const dm = '2025-04-01 00:00:00.000'
-  const jk = "1"
+  const dm = '2024-01-01 00:00:00.000'
+  const jk = "2"
   try {
-    const response = await api.get(url, {
+    const response = await axios.get(url, {
       params: { journalTypeId: jk, modifiedTimeStamp: dm },
       headers: {
         dossierToken: dossiertoken,
@@ -293,11 +293,15 @@ app.post("/move-file", (req, res) => {
     return res.send("File already exists");
   }
 
-  fs.copyFile(source, dest, (err) => {
-    if (err) {
+  if (!fs.existsSync(source)) {
+    // File already exists
+    return res.send("File already moved or not found");
+  }
+
+  fs.move(source, dest, { overwrite: false })
+    .then(() => res.send("File moved successfully"))
+    .catch((err) => {
       console.error(err);
-      return res.status(500).send("Error moving file");
-    }
-    res.send("File copied successfully");
-  });
+      res.status(500).send("Error moving file");
+    });
 });
