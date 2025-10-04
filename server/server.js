@@ -141,8 +141,9 @@ app.get("/octo-bookyears", async (req, res) => {
 });
 
 
-app.get("/octo-bookm", async (req, res) => {
-  const by = "12"; //2024
+app.post("/octo-bookm", async (req, res) => {
+  const { by, jt, dm } = req.body
+  console.log("Received parameters:", { by, jt, dm });
   const url =
     process.env.URL +
     "/dossiers/" +
@@ -152,11 +153,10 @@ app.get("/octo-bookm", async (req, res) => {
     "/bookings/modified";
   const auth = await getAuth();  
   const dossiertoken = await getToken(auth);  
-  const dm = '2024-01-01 00:00:00.000'
-  const jk = "2"
+  
   try {
     const response = await axios.get(url, {
-      params: { journalTypeId: jk, modifiedTimeStamp: dm },
+      params: { journalTypeId: jt, modifiedTimeStamp: dm },
       headers: {
         dossierToken: dossiertoken,
         "Content-Type": "application/json",

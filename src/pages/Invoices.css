@@ -1,15 +1,21 @@
-
-.container {
-  display: flex;
-  padding: 1rem;
-  margin: 10px;
-  width: 100%
+* {
+  box-sizing: border-box;
 }
 
 html, body, #root {
   width: 100%;
-  height: 100%;
+  height: auto;
   margin: 0;
+  /*overflow: hidden; /* prevent global scroll */
+}
+
+.container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  height: calc(100vh - var(--nav-h, 50px)); /* full height minus navbar */
+  margin: 0;
+  padding: 0;
 }
 
 /* Left column */
@@ -17,7 +23,6 @@ html, body, #root {
   flex: 2;
   overflow-y: auto;
   border: 1px solid #999;
-  height: 88vh;
 }
 
 /* Right column */
@@ -25,8 +30,6 @@ html, body, #root {
 flex: 1;
  overflow-y: auto;
  border: 1px solid #999;
- padding: 10px;
- height: 88vh;
 }
 
 /* 4) Left column: sticky header + scrollable content */

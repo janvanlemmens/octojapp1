@@ -1,29 +1,27 @@
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  background-color: #868282;
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;              /* remove default spacing */
+  background: #222;        /* dark background behind everything */
+  text-align: left;        /* optional: avoid centered layout by default */
 }
-
-.content {
-  padding-top: 70px; /* height of navbar + some spacing */
-}
-
 
 .navbar {
-  position: fixed;   /* stays in view */
-  top: 0;   
+  position: fixed;
+  top: 0;
   left: 0;
-  right: 0;          /* stick to top */
-  z-index: 1000;      /* stay above other content */
-  
-  display: flex;
-  gap: 1rem;
-  background: #222;
-  padding: 1rem;
+  right: 0;
+  height: 50px;             /* set fixed height instead of guessing */
+  z-index: 1000;
 
-  /* optional visual polish */
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  background: #222;
+  padding: 0 1rem;
+
   border-bottom: 1px solid #444;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -45,4 +43,16 @@
 .navbar a.active {
   background: #0077ff;
   color: white;
+}
+
+/* container below navbar */
+.container {
+  position: absolute;
+  top: 50px;                   /* match navbar height */
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
+  flex-direction: row;
 }

@@ -5,6 +5,7 @@ import "./InvoiceModal.css";
 export default function InvoiceModal({ invoice, onClose, onSave }) {
 
      if (!invoice) return null;
+  const [ pdffol, pdfname ] = invoice.pdf ? invoice.pdf.split("/") : [null, null];
 
   const [comment, setComment] = useState(invoice.comment || "");
   const [paid, setPaid] = useState(invoice.paid || false);
@@ -16,7 +17,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }) {
       ...invoice,
       comment,
       paid,
-      pdf: file ? file.name :  null// here you’d normally upload file and store path/url
+      pdf: file ? file.name :  pdfname// here you’d normally upload file and store path/url
     };
     onSave(updated);
   };
@@ -50,6 +51,13 @@ export default function InvoiceModal({ invoice, onClose, onSave }) {
               type="file"
               onChange={(e) => setFile(e.target.files[0])}
             />
+            <div style={{ marginTop: "4px", fontSize: "0.9em", color: "#ccc" }}>
+          {file
+            ? `New file selected: ${file.name}`
+            : pdfname
+            ? `Current file: ${pdfname}`
+            : "No file uploaded"}
+        </div>
           </label>
 
           <div className="modal-actions">

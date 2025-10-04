@@ -107,11 +107,6 @@ export default function Relations() {
         ))}
       </ul>
 
-      {/* Button row */}
-      <div className="button-row">
-        <CustomButton onClick={fetchRelations}>Fetch Relations</CustomButton>
-     <CustomButton onClick={procRelations}>Proc Relations</CustomButton>
-      </div>
     </div>
   );
     

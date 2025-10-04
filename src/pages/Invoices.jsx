@@ -136,6 +136,7 @@ export default function Invoices() {
       const res = await axios.post("http://localhost:5001/move-file", { pdfname: "bk" + year + "/" + updated.pdf });
       console.log("move response", res.data);
     }
+     setOpenModal(false)
   };
   
 
@@ -196,7 +197,7 @@ export default function Invoices() {
     <div className="column1">
       {selectedInvoice?.pdf && (
           <iframe
-            src={`http://localhost:5001/pdfs/${selectedInvoice.pdf}`}
+            src={`http://localhost:5001/pdfs/${selectedInvoice.pdf.replace("/","/selected/")}`}
             width="100%"
             height="100%"
             style={{ border: "none" }}
