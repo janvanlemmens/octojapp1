@@ -38,8 +38,19 @@ const InvoicesSchema = {
   },
 };
 
+const UsersSchema = {
+  name: "Users",
+  primaryKey: "email",
+  properties: {
+    email: { type: "string", indexed: true },
+    passwordHash: "string",
+    createdAt: "date",
+  },
+};
+
 export {
   RelationsSchema,
   InvoicesSchema,
+  UsersSchema
 };
    

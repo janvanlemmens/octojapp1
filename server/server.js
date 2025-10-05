@@ -5,11 +5,16 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import axios from "axios";
-import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm } from "./realmHelper.js";
+import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm, getUsersRealm } from "./realmHelper.js";
 import { realmToJson } from "./utils/realmToJson.js";
 import path from "path";
 import fs from "fs-extra";
 import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import { v4 as uuid } from "uuid";
+
 
 // fix __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -62,10 +67,31 @@ app.use(morgan("dev"));
 // 📦 Parse JSON request body
 app.use(express.json());
 
+app.use(cookieParser())
+
 // Example route
 app.get("/api/hello", (req, res) => {
   res.json({ message: "Hello from secure server 👋" });
+
 });
+
+const JWT_SECRET = process.env.JWT_SECRET || "change_me";
+
+function signToken(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
+}
+
+function authMiddleware(req, res, next) {
+  const token = req.cookies["access_token"];
+  if (!token) return res.status(401).json({ error: "Not logged in" });
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
 
 // Start server
 const PORT = process.env.PORT || 3000;
@@ -210,7 +236,7 @@ app.post("/realm-addrelation", async (req, res) => {
   }   
 })
 
-app.get("/realm-relations", async (req, res) => {
+app.get("/realm-relations", authMiddleware, async (req, res) => {
   // Fetch all relations from Realm DB
   try {
     const realmr = await getRelationsRealm();
@@ -313,4 +339,42 @@ app.post("/move-file", (req, res) => {
       console.error(err);
       res.status(500).send("Error moving file");
     });
+});
+
+
+
+app.post("/signup", async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: "Missing fields" });
+
+  const realm = await getUsersRealm();
+  const existing = realm.objects("Users").filtered("email == $0", email);
+  if (existing.length > 0) return res.status(409).json({ error: "Email exists" });
+
+  const hash = await bcrypt.hash(password, 12);
+  let user;
+  realm.write(() => {
+    user = realm.create("Users", { id: uuid(), email, passwordHash: hash, createdAt: new Date() });
+  });
+
+  res.status(201).json({ id: user.id, email: user.email });
+});
+
+app.post("/signin", async (req, res) => {
+  const { email, password } = req.body;
+  const realm = getUsersRealm();
+  const user = realm.objects("Users").filtered("email == $0", email)[0];
+  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+  const token = signToken({ id: user.id, email: user.email });
+  res.cookie("access_token", token, { httpOnly: true, sameSite: "lax" });
+  res.json({ ok: true });
+});
+
+app.post("/api/logout", (req, res) => {
+  res.clearCookie("access_token");
+  res.json({ ok: true });
 });

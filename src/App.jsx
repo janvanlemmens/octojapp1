@@ -3,6 +3,7 @@ import Invoices from "./pages/Invoices";
 import InvoiceForm from "./pages/InvoiceForm";
 import Relations from "./pages/Relations";
 import Import from "./pages/Import";
+import Login from "./pages/Login";
 import './App.css'
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
   return (
     <>
      <nav className="navbar">
+
       <NavLink to="/invoices" className={({ isActive }) => (isActive ? "active" : "")}>Invoices</NavLink>
       <NavLink to="/invform" className={({ isActive }) => (isActive ? "active" : "")}>InvoiceForm</NavLink>
       <NavLink to="/relations" className={({ isActive }) => (isActive ? "active" : "")}>Relations</NavLink>
@@ -19,6 +21,7 @@ function App() {
 
     <main className="content">
       <Routes>
+         <Route path="/" element={<Login />} />
         <Route path="/invoices" element={<Invoices />} />
         <Route path="/invform" element={<InvoiceForm />} />
         <Route path="/relations" element={<Relations />} />

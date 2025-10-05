@@ -1,5 +1,5 @@
 import Realm from "realm";
-import { InvoicesSchema, RelationsSchema } from "./schemas.js";
+import { InvoicesSchema, RelationsSchema, UsersSchema } from "./schemas.js";
 
 const realmInstances = {}; // cache: { path: realmInstance }
 
@@ -31,6 +31,10 @@ Realm.deleteFile({
 /**
  * Convenience helpers for specific realms
  */
+export async function getUsersRealm() {
+  return getRealm(UsersSchema, "users.realm");
+}
+
 export async function getRelationsRealm() {
   return getRealm(RelationsSchema, "relations.realm");
 }
