@@ -14,6 +14,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
+import e from "express";
 
 
 // fix __dirname in ES modules
@@ -259,7 +260,7 @@ app.post("/realm-addinvoice", async (req, res) => {
   }   
 })
 
-app.post("/realm-invoices", async (req, res) => {
+app.post("/realm-invoices", authMiddleware, async (req, res) => {
   // Fetch all invoices from Realm DB
   try {
     const { journal, from, till } = req.body;
@@ -361,13 +362,14 @@ app.post("/signup", async (req, res) => {
 });
 
 app.post("/signin", async (req, res) => {
+
   const { email, password } = req.body;
-  const realm = getUsersRealm();
-  const user = realm.objects("Users").filtered("email == $0", email)[0];
+  const realm = await getUsersRealm();
+  const user = realm.objects("Users").filtered("email == $0", email);
   if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
   const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+  if (!ok) return res.status(401).json({ ok: false, error: "Invalid credentials" });
 
   const token = signToken({ id: user.id, email: user.email });
   res.cookie("access_token", token, { httpOnly: true, sameSite: "lax" });

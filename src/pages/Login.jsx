@@ -13,27 +13,49 @@ export default function Login() {
   const nav = useNavigate();
 
   async function handleLogin(e) {
-    e.preventDefault();
+  e.preventDefault();
 
+  try {
+    const endpoint =
+      action === "signin"
+        ? "http://localhost:5001/signin"
+        : "http://localhost:5001/signup";
 
-  const endpoint = action === "signin" 
-    ? "http://localhost:5001/signin" 
-    : "http://localhost:5001/signup";
+    console.log("endpoint", endpoint);
 
+    const res = await axios.post(endpoint, {
+      email,
+      password,
+    });
 
-    const res = await axios.post(endpoint, { email : email, password: password });
+    console.log("res", res);
+    if (res.status === 200 || res.status === 201) {
+      if (action === "signin") {
+        toast("Signin success!", { type: "success" });
+      }
+      if (action === "signup") {
+        toast("Signup success! " + res.email, { type: "success" });
+      }
 
-
-    console.log("res",res)
-    /*
-    if (res.ok) {
-      setAuthed(true);
       nav("/invoices");
-    } else {
-      alert("Login failed");
     }
-      */
+     // setAuthed(true);
+
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      console.error("Login error", err.response?.status, err.response?.data);
+      if (err.response?.status === 401) {
+        toast("Invalid credentials");
+      } else {
+        toast("Unexpected error: " + (err.response?.data?.error || err.message));
+      }
+    } else {
+      console.error(err);
+      alert("Something went wrong");
+    }
   }
+}
+
 
   return (
     <div className="login-container">
