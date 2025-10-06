@@ -14,7 +14,9 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { v4 as uuid } from "uuid";
-import e from "express";
+import multer from "multer"; //parser json 
+import Papa from "papaparse"; //csv parser
+
 
 
 // fix __dirname in ES modules
@@ -30,6 +32,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const app = express();
 console.log("PDF path:", process.env.PDF_UPLOAD_PATH);
+const upload = multer({ dest: "uploads/" });
 
 app.use("/pdfs", express.static(path.resolve(process.env.PDF_UPLOAD_PATH)));
 
@@ -60,7 +63,7 @@ const store = new Map(); // In-memory store (replace with DB in production)
 app.use(helmet());
 
 // 🌍 CORS: allow frontend to access API
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(cors({ origin: "http://localhost:5173" , credentials: true}));
 
 // 📝 Logging: dev-friendly logs
 app.use(morgan("dev"));
@@ -70,29 +73,10 @@ app.use(express.json());
 
 app.use(cookieParser())
 
-// Example route
-app.get("/api/hello", (req, res) => {
-  res.json({ message: "Hello from secure server 👋" });
-
-});
 
 const JWT_SECRET = process.env.JWT_SECRET || "change_me";
 
-function signToken(payload) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "15m" });
-}
 
-function authMiddleware(req, res, next) {
-  const token = req.cookies["access_token"];
-  if (!token) return res.status(401).json({ error: "Not logged in" });
-
-  try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    return res.status(401).json({ error: "Invalid token" });
-  }
-}
 
 // Start server
 const PORT = process.env.PORT || 3000;
@@ -264,8 +248,14 @@ app.post("/realm-invoices", authMiddleware, async (req, res) => {
   // Fetch all invoices from Realm DB
   try {
     const { journal, from, till } = req.body;
+    console.log("Fetching invoices for:", { journal, from, till });
     const realmi = await getInvoicesRealm();
-    const allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND period >= $1 AND period <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
+    let allInvoices;
+    if (from.length === 6) { // yearmonth format
+    allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND period >= $1 AND period <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
+    } else {  // yyyy-mm-dd format
+    allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND date >= $1 AND date <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
+    }
     res.json(realmToJson(allInvoices));
   } catch (err) {
     console.error("Realm fetch error:", err);
@@ -342,6 +332,25 @@ app.post("/move-file", (req, res) => {
     });
 });
 
+function signToken(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "180m" });
+}
+
+function authMiddleware(req, res, next) {
+  const token = req.cookies["access_token"];
+  if (!token) return res.status(401).json({ error: "Not logged in" });
+
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+
+app.get("/me", authMiddleware, (req, res) => {
+  res.json({ ok: true, user: req.user });
+});
 
 
 app.post("/signup", async (req, res) => {
@@ -364,8 +373,10 @@ app.post("/signup", async (req, res) => {
 app.post("/signin", async (req, res) => {
 
   const { email, password } = req.body;
+  console.log("Signin attempt:", req.body);
   const realm = await getUsersRealm();
-  const user = realm.objects("Users").filtered("email == $0", email);
+  const users = realm.objects("Users").filtered("email == $0", email);
+  const user = users[0];
   if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
   const ok = await bcrypt.compare(password, user.passwordHash);
@@ -379,4 +390,28 @@ app.post("/signin", async (req, res) => {
 app.post("/api/logout", (req, res) => {
   res.clearCookie("access_token");
   res.json({ ok: true });
+});
+
+app.post("/upload",  authMiddleware,  upload.single("file"), async (req, res) => {
+  try {
+    const tempPath = req.file.path;
+    const raw = await fs.readFile(tempPath, "utf8"); // read as text
+
+    // Parse JSON file
+    //const data = JSON.parse(raw);
+    // Parse CSV with PapaParse
+    const parsed = Papa.parse(raw, { 
+      header: true,       // treat first row as headers
+      delimiter: ";",     // 👈 your CSV uses ';'
+      skipEmptyLines: true
+    });
+    // cleanup temp file
+    await fs.remove(tempPath);
+   
+
+    res.json({ success: true, data: parsed.data}); // send array/object back
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });

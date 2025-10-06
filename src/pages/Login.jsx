@@ -6,7 +6,7 @@ import "./Login.css";
 import { Toaster, toast } from "sonner";
 import axios from "axios";
 
-export default function Login() {
+export default function Login({ setAuth }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [action, setAction] = useState("signin");
@@ -26,7 +26,7 @@ export default function Login() {
     const res = await axios.post(endpoint, {
       email,
       password,
-    });
+    }, { withCredentials: true });
 
     console.log("res", res);
     if (res.status === 200 || res.status === 201) {
@@ -36,7 +36,10 @@ export default function Login() {
       if (action === "signup") {
         toast("Signup success! " + res.email, { type: "success" });
       }
-
+      const me = await axios.get("http://localhost:5001/me", {
+        withCredentials: true,
+      });
+      setAuth({ loading: false, user: me.data.user });
       nav("/invoices");
     }
      // setAuthed(true);
