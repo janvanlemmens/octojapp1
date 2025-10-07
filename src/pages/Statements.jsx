@@ -4,6 +4,7 @@ import "./Statements.css"
 
 function Statements() {
   const [stats, setStats] = useState([])
+  //const [invoices, setInvoices] = useState([])
 
 
   const handleUpload = async (e) => {
@@ -44,9 +45,9 @@ function Statements() {
     for (const rec of stats) {
      if (rec.Omschrijving.includes("Kosten")) continue;
      if (rec.Omzetnummer === 0) continue;
-     if (rec.Omzetnummer !=7 && rec.Omzetnummer !=8) continue;
+     //if (rec.Omzetnummer !=7 && rec.Omzetnummer !=8) continue;
      const [part1 = "",part2 = "",part3 = ""] = rec.Omschrijving.split("***") 
-      console.log(rec.Omzetnummer+";"+rec.Boekingsdatum+";"+rec.Bedrag+";"+part2.trim());
+      //console.log(rec.Omzetnummer+";"+rec.Boekingsdatum+";"+rec.Bedrag+";"+part2.trim());
        const [dd,mm,yyyy] = rec.Boekingsdatum.split("/");
        const till = yyyy + "-" + mm.padStart(2,"0") + "-" + dd.padStart(2,"0");
        const from = subtractDays(till, 50);
@@ -55,9 +56,27 @@ function Statements() {
         from: from,
         till: till 
       });
-      const data = response.data;
-      console.log("invoices",data);
-    }
+      const invoices = response.data;
+      let found = false;
+      for (const inv of invoices) {
+        if (found) continue
+        const absAmount = Math.abs(Number(rec.Bedrag.replace(",", ".")));
+          
+        if (inv.totalamount === absAmount && inv.paymentreference.trim() === part2.trim()) {
+          console.log("Match found by paymentref: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
+          found = true;
+          // Post to realm to link invoice to bank record
+          /*const res = await axios.post("http://localhost:5001/realm-link", { 
+            bankId: rec.id,
+            invoiceId: inv._id 
+          }); 
+          console.log("Link response:", res.data); */
+        } else if (inv.totalamount === absAmount) {
+          console.log("Match found by amount: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
+          found = true;
+        }
+      } // end for invoices
+    } //end for stats
   }
 
   return (
