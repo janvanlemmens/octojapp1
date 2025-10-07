@@ -1,0 +1,30 @@
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: sans-serif;
+  font-size: 14px;
+  margin-top: 1rem;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  text-align: left;
+  white-space: nowrap; /* prevents text wrapping in cells */
+}
+
+.invoice-table thead th {
+  position: sticky;
+  top: 0;
+  background: #676869; /* light gray header */
+  z-index: 1;
+}
+
+.invoice-table tbody tr:nth-child(even) {
+  background-color: #4d4a4a; /* striped rows */
+}
+
+.invoice-table tbody tr:hover {
+  background-color: #0077ff; /* highlight on hover */
+}

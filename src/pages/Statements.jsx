@@ -22,8 +22,8 @@ function Statements() {
       });
 
       if (res.data.success) {
-        setStats(res.data.parsed.data);   // 🎯 update React state
-        console.log("Loaded data:", res.data.parsed.data);
+        setStats(res.data.data);   // 🎯 update React state
+        console.log("Loaded data:", res.data.data);
       } else {
         console.error("Upload failed:", res.data.error);
       }
@@ -43,8 +43,10 @@ function Statements() {
     
     for (const rec of stats) {
      if (rec.Omschrijving.includes("Kosten")) continue;
-     if (rec.Omzetnummer !=7) continue;
-      console.log(rec.Omzetnummer+";"+rec.Boekingsdatum+";"+rec.Bedrag+";"+rec.Omschrijving);
+     if (rec.Omzetnummer === 0) continue;
+     if (rec.Omzetnummer !=7 && rec.Omzetnummer !=8) continue;
+     const [part1 = "",part2 = "",part3 = ""] = rec.Omschrijving.split("***") 
+      console.log(rec.Omzetnummer+";"+rec.Boekingsdatum+";"+rec.Bedrag+";"+part2.trim());
        const [dd,mm,yyyy] = rec.Boekingsdatum.split("/");
        const till = yyyy + "-" + mm.padStart(2,"0") + "-" + dd.padStart(2,"0");
        const from = subtractDays(till, 50);
@@ -64,25 +66,22 @@ function Statements() {
     {/* Display stats in a table
 
      */}
-     <table>
+   <table className="invoice-table">
   <thead>
-   {stats.map((row, i) => (
-    <tr key={i}>
-    <td>{row["Nummer"]}</td>
-    <td>{row["Datum"]}</td>
-    <td>{row["Bedrag"]}</td>
-    <td>{row["Omschrijving"]}</td>
+    <tr>
+      <th>Nummer</th>
+      <th>Datum</th>
+      <th>Bedrag</th>
+      <th>Omschrijving</th>
     </tr>
-    ))}
   </thead>
   <tbody>
     {stats.map((row, i) => (
       <tr key={i}>
-        {Object.values(row)
-        .filter((_, j) => [3, 4, 6, 8].includes(j))
-        .map((val, j) => (
-          <td key={j}>{val}</td>
-        ))}
+        <td>{row["Omzetnummer"]}</td>
+        <td>{row["Boekingsdatum"]}</td>
+        <td>{row["Bedrag"]}</td>
+        <td>{row["Omschrijving"]}</td>
       </tr>
     ))}
   </tbody>
