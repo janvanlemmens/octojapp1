@@ -10,12 +10,7 @@ export async function getRealm(schemas, path) {
   if (realmInstances[path] && !realmInstances[path].isClosed) {
     return realmInstances[path];
   }
-/*
-Realm.deleteFile({
-  path: "invoices.realm",
-  schema: [InvoicesSchema],
-});
-*/
+
   
   const realm = await Realm.open({
     schema: Array.isArray(schemas) ? schemas : [schemas],
@@ -36,11 +31,17 @@ export async function getUsersRealm() {
 }
 
 export async function getRelationsRealm() {
+  /*
+Realm.deleteFile({
+  path: "relations.realm",
+  schema: [RelationsSchema],
+});
+*/
   return getRealm(RelationsSchema, "relations.realm");
 }
 
 export async function getInvoicesRealm() {
-  return getRealm([InvoicesSchema, RelationsSchema], "invoices.realm"); //When a schema links to another schema, you must include both schemas when opening the Realm.
+    return getRealm([InvoicesSchema, RelationsSchema], "invoices.realm"); //When a schema links to another schema, you must include both schemas when opening the Realm.
 }
 
 /**

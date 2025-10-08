@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink, Navigate } from "react-router-dom";
+import { Routes, Route, NavLink, Navigate, useNavigate } from "react-router-dom";
 import Invoices from "./pages/Invoices";
 import InvoiceForm from "./pages/InvoiceForm";
 import Relations from "./pages/Relations";
@@ -10,10 +10,12 @@ import './App.css'
 import axios from "axios";
 
 
+
 axios.defaults.withCredentials = true;
 
 function App() {
   const [auth, setAuth] = useState({ loading: true, user: null });
+  const navigate = useNavigate();
 
    useEffect(() => {
     async function checkSession() {
@@ -29,6 +31,18 @@ function App() {
     checkSession();
   }, []);
 
+   const handleLogout = async () => {
+    try {
+      await axios.post("http://localhost:5001/logout", {}, { withCredentials: true });
+    } catch (e) {
+      console.error("logout failed", e);
+    } finally {
+      setAuth({ loading: false, user: null });  // clear auth state
+      navigate("/");  
+                                // go back to login
+    }
+  };
+
   if (auth.loading) return <p>Loading...</p>;
 
   return (
@@ -40,6 +54,11 @@ function App() {
       <NavLink to="/relations" className={({ isActive }) => (isActive ? "active" : "")}>Relations</NavLink>
       <NavLink to="/import" className={({ isActive }) => (isActive ? "active" : "")}>Import</NavLink>
       <NavLink to="/statements" className={({ isActive }) => (isActive ? "active" : "")}>Statements</NavLink>
+      {auth.user && (
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+        )}
      </nav>
 
     <main className="content">

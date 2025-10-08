@@ -33,10 +33,13 @@ export default function Import() {
     console.log(result);
 
     for (const res of result) {
-        
-            const response = await axios.post("http://localhost:5001/realm-addinvoice",res)
-            console.log(response.data)
-        
+        console.log("Processing invoice:", res);
+        try {
+          const response = await axios.post("http://localhost:5001/realm-addinvoice",res)
+          console.log(response.data)
+        } catch (error) {
+          console.error("Error adding invoice:", error);
+        }   
     }
 
   }

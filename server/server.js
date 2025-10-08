@@ -5,7 +5,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import axios from "axios";
-import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm, getUsersRealm } from "./realmHelper.js";
+import { addRelation,  addInvoice, getRelationsRealm, getInvoicesRealm, getUsersRealm, closeAllRealms } from "./realmHelper.js";
 import { realmToJson } from "./utils/realmToJson.js";
 import path from "path";
 import fs from "fs-extra";
@@ -387,8 +387,9 @@ app.post("/signin", async (req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/api/logout", (req, res) => {
+app.post("/logout", (req, res) => {
   res.clearCookie("access_token");
+  closeAllRealms
   res.json({ ok: true });
 });
 

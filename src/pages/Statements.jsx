@@ -91,6 +91,7 @@ function Statements() {
       <th>Nummer</th>
       <th>Datum</th>
       <th>Bedrag</th>
+      <th>Rekening</th>
       <th>Omschrijving</th>
     </tr>
   </thead>
@@ -100,6 +101,7 @@ function Statements() {
         <td>{row["Omzetnummer"]}</td>
         <td>{row["Boekingsdatum"]}</td>
         <td>{row["Bedrag"]}</td>
+        <td>{row["Rekening tegenpartij"]}</td>
         <td>{row["Omschrijving"]}</td>
       </tr>
     ))}

@@ -13,6 +13,7 @@ const RelationsSchema = {
     phone: "string?" ,
     email: "string?" ,
     vatnumber: "string?",
+    iban: { type: "string", indexed: true },
   },
 };
 

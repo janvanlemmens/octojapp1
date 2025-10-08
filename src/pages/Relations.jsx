@@ -35,6 +35,7 @@ export default function Relations() {
       try {
         const response = await axios.get("http://localhost:5001/realm-relations");
         setRelations(response.data); // expect array of relations
+        //console.log("Fetched relations:", response.data);
       } catch (err) {
         console.error("Failed to fetch relations:", err.message);
       }
@@ -64,7 +65,7 @@ export default function Relations() {
             return;
         }
         for (const rel of relarray) {
-            //console.log("RelName:", rel.name)
+            console.log("RelName:", rel.name, rel.ibanAccountNr)
             const relid = rel.relationIdentificationServiceData.relationKey.id;
             
             const response = await axios.post("http://localhost:5001/realm-addrelation", {
@@ -78,7 +79,8 @@ export default function Relations() {
                 email: rel.email,
                 vatnumber: rel.vatNr,
                 client: rel.client,
-                supplier: rel.supplier  
+                supplier: rel.supplier,
+                iban: rel.ibanAccountNr
 
             });
             console.log(response.data);
@@ -86,27 +88,53 @@ export default function Relations() {
         };
     }
 
- 
-    return (
+ return (
     <div className="relations-container">
-      {/* Search input */}
-      <input
-        type="text"
-        className="search-input"
-        placeholder="Search relations..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+       {/* Controls */}
+      <div className="relations-controls">
+        <input
+          type="text"
+          className="search-input"
+          placeholder="Search relations..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-      {/* List */}
-      <ul className="relations-list">
-        {filtered.map((rel) => (
-          <li key={rel.id} className="relation-item">
-            <strong>{rel.name}</strong> — {rel.city}, {rel.country}
-          </li>
-        ))}
-      </ul>
+        <div className="relations-buttons">
+          <button className="btn" onClick={fetchRelations}>Fetch</button>
+          <button className="btn" onClick={procRelations}>Process</button>
+        </div>
+      </div>
 
+      {/* Table */}
+      <div className="relations-table-wrapper">
+        <table className="relations-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Postal Code</th>
+              <th>City</th>
+              <th>Client</th>
+              <th>Supplier</th>
+              <th>IBAN</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((rel) => (
+              <tr key={rel.id}>
+                <td>{rel.id}</td>
+                <td>{rel.name}</td>
+                <td>{rel.postalcode}</td>
+                <td>{rel.city}</td>
+                <td>{rel.client ? "✔" : ""}</td>
+                <td>{rel.supplier ? "✔" : ""}</td>
+                <td>{rel.iban}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
     
