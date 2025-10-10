@@ -6,6 +6,7 @@ import "./Login.css";
 import { Toaster, toast } from "sonner";
 import axios from "axios";
 
+
 export default function Login({ setAuth }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -86,7 +87,11 @@ export default function Login({ setAuth }) {
         </div>
 
        <button type="submit" onClick={() => setAction("signin")} className="submit-button">Sign In</button>
-       <button type="submit" onClick={() => setAction("signup")} className="submit-button">Sign Up</button>
+       <button  onClick={() => {
+         setAction("signup");
+         handleLogin()
+         }} // call submit manually
+        className="submit-button">Sign Up</button>
        <Toaster richColors position="top-center" offset={100}/>
       </form>
     </div>

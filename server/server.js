@@ -247,14 +247,17 @@ app.post("/realm-addinvoice", async (req, res) => {
 app.post("/realm-invoices", authMiddleware, async (req, res) => {
   // Fetch all invoices from Realm DB
   try {
-    const { journal, from, till } = req.body;
-    console.log("Fetching invoices for:", { journal, from, till });
+    const { journal, from, till, paid } = req.body;
+    //console.log("Fetching invoices for:", { journal, from, till, paid });
     const realmi = await getInvoicesRealm();
     let allInvoices;
     if (from.length === 6) { // yearmonth format
     allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND period >= $1 AND period <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
     } else {  // yyyy-mm-dd format
     allInvoices = realmi.objects("Invoices").filtered('journal == $0 AND date >= $1 AND date <= $2', journal, from, till) //.sorted([['period', false], ['documentnr', false]] );
+    }
+     if (paid) {
+      allInvoices = allInvoices.filtered('paid == true');
     }
     res.json(realmToJson(allInvoices));
   } catch (err) {
@@ -263,7 +266,27 @@ app.post("/realm-invoices", authMiddleware, async (req, res) => {
   }
 })
 
-// server.js denk niet gebruikt
+app.post("/realm-paid", async (req, res) => {
+  const { bankId, invoiceId } = req.body; // Expecting relation data in request body
+  //console.log("Linking bank record to invoice:", { bankId, invoiceId });
+  try {
+    const realmi = await getInvoicesRealm();
+    const invoice = realmi.objectForPrimaryKey("Invoices", invoiceId);
+    if (!invoice) return res.status(404).json({ error: "Invoice not found" });
+
+    realmi.write(() => {
+      invoice.paid = true;
+      invoice.paymentreference = invoice.paymentreference ? invoice.paymentreference + " | " + bankId : bankId;
+    });
+
+    res.json({ message: "Invoice marked as paid", id: invoiceId });
+  } catch (err) {
+    console.error("Failed to link bank record:", err);
+    res.status(500).json({ error: "Failed to link bank record to invoice" });
+  }   
+})
+
+// in invoiceForm.jsx
 app.post("/invoices/upsert", async (req, res) => {
   try {
     const payload = req.body;

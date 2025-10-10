@@ -54,7 +54,8 @@ function Statements() {
        const response = await axios.post("http://localhost:5001/realm-invoices", { 
         journal: "11",
         from: from,
-        till: till 
+        till: till,
+        nopaid: true
       });
       const invoices = response.data;
       let found = false;
@@ -62,18 +63,19 @@ function Statements() {
         if (found) continue
         const absAmount = Math.abs(Number(rec.Bedrag.replace(",", ".")));
           
-        if (inv.totalamount === absAmount && inv.paymentreference.trim() === part2.trim()) {
-          console.log("Match found by paymentref: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
+        if (rec["Rekening tegenpartij"] === inv.relation.iban && inv.totalamount === absAmount && inv.paymentreference.trim() === part2.trim()) {
+          //console.log("Match found by paymentref: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
+          //console.log("rec:", rec["Rekening tegenpartij"]);
           found = true;
           // Post to realm to link invoice to bank record
-          /*const res = await axios.post("http://localhost:5001/realm-link", { 
-            bankId: rec.id,
-            invoiceId: inv._id 
+          const res = await axios.post("http://localhost:5001/realm-paid", { 
+            bankId: rec.Boekingsdatum,
+            invoiceId: inv.id 
           }); 
-          console.log("Link response:", res.data); */
-        } else if (inv.totalamount === absAmount) {
-          console.log("Match found by amount: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
-          found = true;
+          console.log("Link response:", res.data); 
+        } else if (rec["Rekening tegenpartij"] === inv.relation.iban && inv.totalamount === absAmount) {
+          //console.log("Match found by amount: ", rec.Omzetnummer,inv.id, absAmount, part3.trim());
+          //found = true;
         }
       } // end for invoices
     } //end for stats
@@ -99,7 +101,7 @@ function Statements() {
     {stats.map((row, i) => (
       <tr key={i}>
         <td>{row["Omzetnummer"]}</td>
-        <td>{row["Boekingsdatum"]}</td>
+        <td>{row["329941"]}</td>
         <td>{row["Bedrag"]}</td>
         <td>{row["Rekening tegenpartij"]}</td>
         <td>{row["Omschrijving"]}</td>

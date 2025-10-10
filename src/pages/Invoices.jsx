@@ -20,7 +20,8 @@ export default function Invoices() {
   const [ formData, setFormData] = useState({
     from: "",
     till: "",
-    search: ""
+    search: "",
+    status: "0"  // all
     
   })
   const [ file, setFile] = useState(null)
@@ -37,7 +38,8 @@ export default function Invoices() {
       const response = await axios.post("http://localhost:5001/realm-invoices", { 
         journal: journal,
         from: formData.from || yearprev,
-        till: formData.till || yearcur     
+        till: formData.till || yearcur,     
+        paid: formData.status === "0" ? null : formData.status === "1" ? true : false
       });
       const data = response.data;   // axios puts parsed JSON here
       
@@ -47,8 +49,25 @@ export default function Invoices() {
       console.log("Invoices fetched:", sortedArray);
 
     } catch (err) {
-      console.error("Request failed:", err.message);
+  if (err.response) {
+    // The backend responded with a status code outside 2xx
+    console.error("Error status:", err.response.status);
+    console.error("Error data:", err.response.data);
+    
+
+    if (err.response.status === 401) {
+      //alert(err.response.data.error || "Unauthorized"); 
+      toast.error(err.response.data.error || "Unauthorized");
+      // or toast.error(err.response.data.error || "Unauthorized");
     }
+  } else if (err.request) {
+    // No response received from backend
+    console.error("No response:", err.request);
+  } else {
+    // Something else went wrong
+    console.error("Error:", err.message);
+  }
+}
   }
 
 
@@ -172,15 +191,28 @@ export default function Invoices() {
     </div>
   </div>
 
-  <div className="bwrapper">
-    <CustomButton onClick={handleRefresh}>Refresh</CustomButton>
-  </div>
-<Toaster richColors position="top-center" offset={100}/>
+ 
+
+ <select
+    id="selectStatus"
+    name="status"
+    value={formData.status}
+    onChange={handleChangeForm}
+  >
+    <option value="0">All</option>
+    <option value="1">Paid</option>
+    <option value="2">Not Paid</option>
+  </select>
   <input placeholder="Search..."
         name="search"
         value={formData.search} 
          onChange={handleChangeForm}
+         style={{ width: '200px' , height: '32px' }}
          />
+          <div className="bwrapper">
+    <CustomButton onClick={handleRefresh}>Refresh</CustomButton>
+  </div>
+<Toaster richColors position="top-center" offset={100}/>
 </div>
 
       <div className="content-area">
@@ -195,17 +227,28 @@ export default function Invoices() {
       </div>
     </div>
 
-    <div className="column1">
-      {selectedInvoice?.pdf && (
-          <iframe
-            src={`http://localhost:5001/pdfs/${selectedInvoice.pdf.replace("/","/selected/")}`}
-            width="100%"
-            height="100%"
-            style={{ border: "none" }}
-            title="Invoice PDF"
+   <div className="column1">
+  {selectedInvoice?.pdf && (
+    <>
+      {selectedInvoice.pdf.toLowerCase().endsWith(".pdf") ? (
+        <iframe
+          src={`http://localhost:5001/pdfs/${selectedInvoice.pdf.replace("/", "/selected/")}`}
+          width="100%"
+          height="100%"
+          style={{ border: "none" }}
+          title="Invoice PDF"
+        />
+      ) : (
+        <div className="image-wrapper">
+          <img
+            src={`http://localhost:5001/pdfs/${selectedInvoice.pdf.replace("/", "/selected/")}`}
+            alt="Invoice"
           />
-        ) }
-    </div>
+        </div>
+      )}
+    </>
+  )}
+</div>
   </div>
 
   )

@@ -29,8 +29,8 @@ export default function Import() {
   const procInvoices = async () => {
 
     const result = processInvoices(invoices);
-    console.log("invoices",invoices)
-    console.log(result);
+    //console.log("invoices",invoices)
+    //console.log(result);
 
     for (const res of result) {
         console.log("Processing invoice:", res);
@@ -46,8 +46,9 @@ export default function Import() {
 
   function processInvoices(invoices) {
   const grouped = {};
-  const generalAccount = journalType === 1 ? 440000 : 400000; // Purchase or Sales
-  const taxAccount = journalType === 1 ? 411000 : 451000; // Purchase or Sales
+  const generalAccount = journalType === "1" ? 440000 : 400000; // Purchase or Sales
+  const taxAccount = journalType === "1" ? 411000 : 451000; // Purchase or Sales
+  console.log("General Account:", generalAccount, "Tax Account:", taxAccount);
   for (const line of invoices) {
     // Build a composite key
     const key = `${line.bookyearPeriodeNr}_${line.journalType}${line.journalNr}_${String(line.documentSequenceNr).padStart(3, "0")}`;
@@ -67,8 +68,7 @@ export default function Import() {
         taxamount: 0,
         totalamount: 0,
         cn: false,
-        paid: false,
-        pdf: null,
+        
       };
     }
 

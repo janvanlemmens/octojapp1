@@ -9,6 +9,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }) {
 
   const [comment, setComment] = useState(invoice.comment || "");
   const [paid, setPaid] = useState(invoice.paid || false);
+  const [payref, setPayref] = useState(invoice.paymentreference || "");
   const [file, setFile] = useState(null);
 
   const handleSubmit = (e) => {
@@ -17,6 +18,7 @@ export default function InvoiceModal({ invoice, onClose, onSave }) {
       ...invoice,
       comment,
       paid,
+      paymentreference: payref,
       pdf: file ? file.name :  pdfname// here you’d normally upload file and store path/url
     };
     onSave(updated);
@@ -33,6 +35,14 @@ export default function InvoiceModal({ invoice, onClose, onSave }) {
               type="text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
+            />
+          </label>
+          <label>
+            PaymentReference
+            <input
+              type="text"
+              value={payref}
+              onChange={(e) => setPayref(e.target.value)}
             />
           </label>
 
